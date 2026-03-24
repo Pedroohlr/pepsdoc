@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useDocData } from './hooks/useDocData';
 import { Sidebar } from './components/Sidebar';
 import { EndpointPage } from './components/EndpointPage';
 import ResponsePanel from './components/ResponsePanel';
 import VersionSelector from './components/VersionSelector';
+import { SearchModal } from './components/SearchModal';
 import type { Endpoint } from './types';
 
 export default function App() {
@@ -11,6 +12,19 @@ export default function App() {
   const [selectedVersion, setSelectedVersion] = useState<string>('');
   const [selectedEndpoint, setSelectedEndpoint] = useState<{ group: string; index: number } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Cmd+K / Ctrl+K to open search
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const currentVersion = useMemo(() => {
     if (!data) return null;
@@ -70,6 +84,16 @@ export default function App() {
           <span className="text-sm font-semibold text-white">{data.config.title}</span>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg text-sm text-[#666] hover:border-[#444] transition-colors cursor-pointer"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+            </svg>
+            Search...
+            <kbd className="text-[10px] text-[#555] bg-[#111] px-1.5 py-0.5 rounded border border-[#333] ml-2">Ctrl+K</kbd>
+          </button>
           <VersionSelector
             versions={data.versions}
             selected={selectedVersion}
@@ -111,6 +135,14 @@ export default function App() {
           <ResponsePanel endpoint={currentEndpoint} baseUrl={data.config.baseUrl} />
         )}
       </div>
+
+      {/* Search Modal (Cmd+K) */}
+      <SearchModal
+        groups={currentVersion.groups}
+        onSelect={(group: string, index: number) => setSelectedEndpoint({ group, index })}
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
     </div>
   );
 }
