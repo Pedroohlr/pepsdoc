@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Endpoint } from '../types';
 import { CodeBlock } from './CodeBlock';
 
@@ -73,6 +73,7 @@ function getStatusColor(status: number): string {
 
 export default function ResponsePanel({ endpoint, baseUrl }: ResponsePanelProps) {
   const llmMarkdown = useMemo(() => generateLLMMarkdown(endpoint, baseUrl), [endpoint, baseUrl]);
+  const [copiedLLM, setCopiedLLM] = useState(false);
 
   const sections = useMemo(() => {
     const items: string[] = ['Endpoint'];
@@ -90,6 +91,8 @@ export default function ResponsePanel({ endpoint, baseUrl }: ResponsePanelProps)
 
   const handleCopyLLM = async () => {
     await navigator.clipboard.writeText(llmMarkdown);
+    setCopiedLLM(true);
+    setTimeout(() => setCopiedLLM(false), 2000);
   };
 
   return (
@@ -146,12 +149,27 @@ export default function ResponsePanel({ endpoint, baseUrl }: ResponsePanelProps)
       <div className="p-4 border-t border-[#1e1e1e] mt-auto">
         <button
           onClick={handleCopyLLM}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-[#1a1a2e] hover:bg-[#252540] text-[#818cf8] text-sm font-medium rounded-lg border border-[#2e2e4a] transition-colors cursor-pointer"
+          className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg border transition-colors cursor-pointer ${
+            copiedLLM
+              ? 'bg-green-500/15 text-green-400 border-green-500/30'
+              : 'bg-[#1a1a2e] hover:bg-[#252540] text-[#818cf8] border-[#2e2e4a]'
+          }`}
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
-          Copy for LLM
+          {copiedLLM ? (
+            <>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Copied!
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy for LLM
+            </>
+          )}
         </button>
       </div>
     </div>
