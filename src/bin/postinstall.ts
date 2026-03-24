@@ -6,19 +6,35 @@
  */
 
 const PURPLE = '\x1b[35m';
-const CYAN = '\x1b[36m';
+const GREEN = '\x1b[32m';
+const YELLOW = '\x1b[33m';
 const DIM = '\x1b[2m';
 const RESET = '\x1b[0m';
 const BOLD = '\x1b[1m';
 
+const line = '─'.repeat(58);
+
 console.log('');
-console.log(`  ${PURPLE}${BOLD}PepsDoc${RESET} installed successfully!`);
+console.log(`  ${PURPLE}${BOLD}✦ PepsDoc${RESET} installed!`);
 console.log('');
-console.log(`  ${CYAN}Quick start:${RESET}`);
-console.log(`    1. npx pepsdoc init`);
-console.log(`    2. Add endpoints to pepsdoc/data/v1/`);
-console.log(`    3. npx pepsdoc dev`);
+console.log(`  ${GREEN}${BOLD}Let AI document your entire API automatically.${RESET}`);
+console.log(`  ${DIM}Copy the prompt below and paste it into your AI assistant:${RESET}`);
 console.log('');
-console.log(`  ${DIM}Or let AI do the work — copy the AI Skill from:${RESET}`);
-console.log(`  ${DIM}node_modules/@pepshlr/pepdoc/templates/ai-skill.md${RESET}`);
+console.log(`  ┌${line}┐`);
+console.log(`  │ ${YELLOW}pepsdoc: integrate and document my entire API            ${RESET} │`);
+console.log(`  │                                                          │`);
+console.log(`  │ @pepshlr/pepdoc is already installed. Do the following:  │`);
+console.log(`  │                                                          │`);
+console.log(`  │ 1. Find my main server file and add the adapter:         │`);
+console.log(`  │    Express → pepsdoc(app, { title: '...' })              │`);
+console.log(`  │    Fastify → fastifyAdapter(app, { title: '...' })       │`);
+console.log(`  │    Hono    → honoAdapter(app, { title: '...' })          │`);
+console.log(`  │                                                          │`);
+console.log(`  │ 2. Read all route files in the project and generate      │`);
+console.log(`  │    JSON docs in pepsdoc/data/v1/ (one file per group).   │`);
+console.log(`  │    Schema: node_modules/@pepshlr/pepdoc/templates/       │`);
+console.log(`  │            ai-skill.md                                   │`);
+console.log(`  │                                                          │`);
+console.log(`  │ 3. Start the server and tell me the docs URL.            │`);
+console.log(`  └${line}┘`);
 console.log('');
