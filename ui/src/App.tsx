@@ -95,7 +95,7 @@ export default function App() {
   const hasTabs = tabs && tabs.length > 0;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+    <div className="h-screen bg-[#0a0a0a] flex flex-col overflow-hidden">
       {/* Header */}
       <header className="h-14 border-b border-[#1e1e1e] flex items-center justify-between px-4 bg-[#0a0a0a] shrink-0">
         <div className="flex items-center gap-3">

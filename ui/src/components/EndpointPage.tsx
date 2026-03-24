@@ -1,9 +1,41 @@
+import { useState } from 'react'
 import { CodeBlock } from './CodeBlock'
 import type { Endpoint, ParamField } from '../types'
 
 interface EndpointPageProps {
   endpoint: Endpoint
   baseUrl?: string
+}
+
+function generateLLMMarkdown(endpoint: Endpoint, baseUrl?: string): string {
+  const url = baseUrl ? `${baseUrl}${endpoint.path}` : endpoint.path
+  let md = `## ${endpoint.method} ${endpoint.path}\n\n`
+  if (endpoint.summary) md += `${endpoint.summary}\n\n`
+  md += `### Request\n- Method: ${endpoint.method}\n- URL: ${url}\n`
+  if (endpoint.headers?.length) {
+    md += `- Headers:\n`
+    for (const h of endpoint.headers) md += `  - ${h.name}: ${h.type}${h.required ? ' (required)' : ''}\n`
+  }
+  if (endpoint.queryParams?.length) {
+    md += `- Query Parameters:\n`
+    for (const p of endpoint.queryParams) md += `  - ${p.name}: ${p.type}${p.required ? ' (required)' : ''}${p.description ? ` - ${p.description}` : ''}\n`
+  }
+  if (endpoint.body) {
+    md += `- Content-Type: ${endpoint.body.contentType || 'application/json'}\n`
+    if (endpoint.body.fields?.length) {
+      md += `- Body fields:\n`
+      for (const f of endpoint.body.fields) md += `  - ${f.name}: ${f.type}${f.required ? ' (required)' : ''}${f.description ? ` - ${f.description}` : ''}\n`
+    }
+    if (endpoint.body.example) md += `- Body example:\n\`\`\`json\n${JSON.stringify(endpoint.body.example, null, 2)}\n\`\`\`\n`
+  }
+  if (endpoint.responses?.length) {
+    md += `\n### Responses\n`
+    for (const r of endpoint.responses) {
+      md += `\n#### ${r.status}${r.description ? ` - ${r.description}` : ''}\n`
+      if (r.example) md += `\`\`\`json\n${JSON.stringify(r.example, null, 2)}\n\`\`\`\n`
+    }
+  }
+  return md
 }
 
 const METHOD_COLORS: Record<string, string> = {
@@ -76,10 +108,17 @@ function ParamTable({ title, fields, sectionId }: { title: string; fields: Param
 export function EndpointPage({ endpoint, baseUrl }: EndpointPageProps) {
   const methodColor = getMethodColor(endpoint.method)
   const fullPath = baseUrl ? `${baseUrl}${endpoint.path}` : endpoint.path
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(generateLLMMarkdown(endpoint, baseUrl))
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
-    <div className="h-full overflow-y-auto px-8 py-10" style={{ color: '#e5e5e5' }}>
-      {/* Header: method badge + path */}
+    <div className="px-8 py-10 min-h-full" style={{ color: '#e5e5e5' }}>
+      {/* Header: method badge + path + Copy for LLM */}
       <div className="flex items-center gap-3 flex-wrap" data-section="endpoint">
         <span
           className="inline-flex items-center px-3 py-1 rounded-md text-sm font-bold tracking-wide text-white select-none shrink-0"
@@ -101,6 +140,30 @@ export function EndpointPage({ endpoint, baseUrl }: EndpointPageProps) {
             deprecated
           </span>
         )}
+        <button
+          onClick={handleCopy}
+          className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer shrink-0 ${
+            copied
+              ? 'bg-green-500/15 text-green-400 border-green-500/30'
+              : 'bg-[#1a1a2e] hover:bg-[#252540] text-[#818cf8] border-[#2e2e4a]'
+          }`}
+        >
+          {copied ? (
+            <>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Copied!
+            </>
+          ) : (
+            <>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy for LLM
+            </>
+          )}
+        </button>
       </div>
 
       {/* Summary + Description */}
