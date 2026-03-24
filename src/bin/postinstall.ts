@@ -1,44 +1,50 @@
 #!/usr/bin/env node
 
 /**
- * PepsDoc - Post-install onboarding message
- * Uses stderr so npm always shows it (stdout is suppressed for dependency scripts)
+ * PepsDoc - Post-install onboarding
+ * Creates PEPSDOC.md in the user's project root so it appears in VS Code
  */
 
-const PURPLE = '\x1b[35m';
-const GREEN = '\x1b[32m';
-const YELLOW = '\x1b[33m';
-const DIM = '\x1b[2m';
-const RESET = '\x1b[0m';
-const BOLD = '\x1b[1m';
+import * as fs from 'fs';
+import * as path from 'path';
 
-const line = '─'.repeat(58);
+// INIT_CWD = the directory where the user ran `npm install`
+const projectRoot = process.env.INIT_CWD || process.cwd();
+const outputFile = path.join(projectRoot, 'PEPSDOC.md');
 
-const lines = [
-  '',
-  `  ${PURPLE}${BOLD}✦ PepsDoc${RESET} installed!`,
-  '',
-  `  ${GREEN}${BOLD}Let AI document your entire API automatically.${RESET}`,
-  `  ${DIM}Copy the prompt below and paste it into your AI assistant:${RESET}`,
-  '',
-  `  ┌${line}┐`,
-  `  │ ${YELLOW}pepsdoc: integrate and document my entire API            ${RESET} │`,
-  `  │                                                          │`,
-  `  │ @pepshlr/pepdoc is already installed. Do the following:  │`,
-  `  │                                                          │`,
-  `  │ 1. Find my main server file and add the adapter:         │`,
-  `  │    Express → pepsdoc(app, { title: '...' })              │`,
-  `  │    Fastify → fastifyAdapter(app, { title: '...' })       │`,
-  `  │    Hono    → honoAdapter(app, { title: '...' })          │`,
-  `  │                                                          │`,
-  `  │ 2. Read all route files in the project and generate      │`,
-  `  │    JSON docs in pepsdoc/data/v1/ (one file per group).   │`,
-  `  │    Schema: node_modules/@pepshlr/pepdoc/templates/       │`,
-  `  │            ai-skill.md                                   │`,
-  `  │                                                          │`,
-  `  │ 3. Start the server and tell me the docs URL.            │`,
-  `  └${line}┘`,
-  '',
-];
+// Don't run inside the pepsdoc package itself
+if (projectRoot.includes('pepsdoc') && !process.env.INIT_CWD) {
+  process.exit(0);
+}
 
-process.stderr.write(lines.join('\n') + '\n');
+const content = `# PepsDoc is ready!
+
+Paste the prompt below into your AI assistant and it will set everything up automatically:
+
+---
+
+\`\`\`
+@pepshlr/pepdoc is already installed. Do the following:
+
+1. Find my main server file and add the adapter:
+   - Express  → const { pepsdoc } = require('@pepshlr/pepdoc'); pepsdoc(app, { title: 'My API' })
+   - Fastify  → const { fastifyAdapter } = require('@pepshlr/pepdoc'); fastifyAdapter(app, { title: 'My API' })
+   - Hono     → const { honoAdapter } = require('@pepshlr/pepdoc'); honoAdapter(app, { title: 'My API' })
+
+2. Read all route files in the project and generate JSON documentation
+   files in pepsdoc/data/v1/ (one file per group of routes).
+   Follow the schema in: node_modules/@pepshlr/pepdoc/templates/ai-skill.md
+
+3. Start the server and tell me the URL to access the docs.
+\`\`\`
+
+---
+
+You can delete this file after setting up.
+`;
+
+try {
+  fs.writeFileSync(outputFile, content);
+} catch {
+  // Silently ignore — don't break the install
+}
