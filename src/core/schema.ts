@@ -9,6 +9,7 @@ export interface PepsDocConfig {
   title: string;
   description?: string;
   basePath?: string; // padrão: /docs
+  baseUrl?: string; // URL base da API (ex: https://api.meusite.com)
   versions?: VersionConfig[];
   tabs?: TabConfig[];
   theme?: ThemeConfig;
