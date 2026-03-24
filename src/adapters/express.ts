@@ -16,6 +16,7 @@ interface ExpressApp {
 
 interface ExpressRequest {
   path: string;
+  originalUrl: string;
 }
 
 interface ExpressResponse {
@@ -25,7 +26,7 @@ interface ExpressResponse {
   send(body: string | Buffer): void;
   status(code: number): this;
   set(field: string, value: string): this;
-  end(data?: string | Buffer): void;
+  redirect(url: string): void;
 }
 
 type NextFunction = () => void;
@@ -64,7 +65,6 @@ export function expressAdapter(app: ExpressApp, userConfig?: Partial<PepsDocConf
   });
 
   // Serve a UI estática
-  // __dirname will be dist/adapters/ when compiled, so go up 2 levels to package root
   const uiBuildDir = path.join(__dirname, '..', '..', 'ui', 'build');
 
   const MIME_TYPES: Record<string, string> = {
@@ -84,7 +84,6 @@ export function expressAdapter(app: ExpressApp, userConfig?: Partial<PepsDocConf
   };
 
   if (fs.existsSync(uiBuildDir)) {
-    // Serve static assets under basePath with correct MIME types
     app.use(basePath, (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
       // Skip API routes
       if (req.path.startsWith('/api/')) {
@@ -92,9 +91,14 @@ export function expressAdapter(app: ExpressApp, userConfig?: Partial<PepsDocConf
         return;
       }
 
-      const filePath = path.join(uiBuildDir, req.path);
+      // Redirect /docs to /docs/ so relative asset paths (./assets/) resolve correctly
+      if (req.originalUrl === basePath) {
+        res.redirect(`${basePath}/`);
+        return;
+      }
 
-      // Check if the file exists and is actually a file (not directory)
+      // Serve static file if it exists
+      const filePath = path.join(uiBuildDir, req.path);
       if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
         const ext = path.extname(filePath).toLowerCase();
         const mime = MIME_TYPES[ext] || 'application/octet-stream';
@@ -103,13 +107,12 @@ export function expressAdapter(app: ExpressApp, userConfig?: Partial<PepsDocConf
         return;
       }
 
-      // SPA fallback: serve index.html for any non-file route
+      // SPA fallback: serve index.html
       const indexPath = path.join(uiBuildDir, 'index.html');
       res.set('Content-Type', 'text/html');
       res.send(fs.readFileSync(indexPath, 'utf-8'));
     });
   } else {
-    // Em dev: mostra mensagem placeholder
     app.get(`${basePath}`, (_req: ExpressRequest, res: ExpressResponse) => {
       res.type('html').send(`
         <!DOCTYPE html>
