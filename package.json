@@ -1,5 +1,5 @@
 {
-  "name": "@pedroohlr/pepsdoc",
+  "name": "@pepshlr/pepdoc",
   "version": "0.0.1",
   "description": "API documentation, beautifully automated.",
   "main": "dist/index.js",
