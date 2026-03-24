@@ -138,9 +138,8 @@ export function SearchModal({ groups, onSelect, isOpen, onClose }: SearchModalPr
                   onSelect(result.group, result.index);
                   onClose();
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors cursor-pointer ${
-                  i === selectedIndex ? 'bg-[#1e1e2e]' : 'hover:bg-[#1a1a1a]'
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors cursor-pointer ${i === selectedIndex ? 'bg-[#1e1e2e]' : 'hover:bg-[#1a1a1a]'
+                  }`}
               >
                 <span
                   className="text-[10px] font-bold font-mono px-2 py-0.5 rounded shrink-0"

@@ -10,26 +10,26 @@ function highlightJson(raw: string): string {
     /("(?:\\.|[^"\\])*")\s*:/g,
     '<span style="color:#67e8f9">$1</span>:',
   )
-  .replace(
-    /:\s*("(?:\\.|[^"\\])*")/g,
-    (match, value) => match.replace(value, `<span style="color:#4ade80">${value}</span>`),
-  )
-  .replace(
-    /(?<=[:,[\s])\s*("(?:\\.|[^"\\])*")(?=\s*[,\]\n\r}])/g,
-    '<span style="color:#4ade80">$1</span>',
-  )
-  .replace(
-    /\b(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g,
-    '<span style="color:#fb923c">$1</span>',
-  )
-  .replace(
-    /\b(true|false)\b/g,
-    '<span style="color:#c084fc">$1</span>',
-  )
-  .replace(
-    /\bnull\b/g,
-    '<span style="color:#f87171">null</span>',
-  )
+    .replace(
+      /:\s*("(?:\\.|[^"\\])*")/g,
+      (match, value) => match.replace(value, `<span style="color:#4ade80">${value}</span>`),
+    )
+    .replace(
+      /(?<=[:,[\s])\s*("(?:\\.|[^"\\])*")(?=\s*[,\]\n\r}])/g,
+      '<span style="color:#4ade80">$1</span>',
+    )
+    .replace(
+      /\b(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g,
+      '<span style="color:#fb923c">$1</span>',
+    )
+    .replace(
+      /\b(true|false)\b/g,
+      '<span style="color:#c084fc">$1</span>',
+    )
+    .replace(
+      /\bnull\b/g,
+      '<span style="color:#f87171">null</span>',
+    )
 }
 
 export function CodeBlock({ code, title }: CodeBlockProps) {

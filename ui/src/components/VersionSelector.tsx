@@ -26,11 +26,10 @@ export default function VersionSelector({ versions, selected, onSelect }: Versio
           <button
             key={v.name}
             onClick={() => onSelect(v.name)}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5 ${
-              isActive
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5 ${isActive
                 ? 'bg-[#1a1a2e] text-white border border-[#2e2e4a]'
                 : 'text-[#888] hover:text-white hover:bg-[#1a1a1a]'
-            }`}
+              }`}
           >
             {v.name}
             {badge && (
