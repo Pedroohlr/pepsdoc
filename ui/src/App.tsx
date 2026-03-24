@@ -100,7 +100,7 @@ export default function App() {
       <header className="h-14 border-b border-[#1e1e1e] flex items-center justify-between px-4 bg-[#0a0a0a] shrink-0">
         <div className="flex items-center gap-3">
           {data.config.theme?.logo ? (
-            <img src={data.config.theme.logo} alt="" className="h-6" />
+            <img src={data.config.theme.logo} alt="logo" className="h-8 w-auto object-contain" />
           ) : (
             <span className="text-sm font-bold text-[#818cf8]">PepsDoc</span>
           )}
