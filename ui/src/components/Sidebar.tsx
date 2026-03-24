@@ -137,8 +137,8 @@ export function Sidebar({
                         key={`${endpoint.method}-${endpoint.path}-${idx}`}
                         onClick={() => onSelectEndpoint(group.group, idx)}
                         className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-md transition-colors cursor-pointer ${selected
-                            ? 'bg-[#1a1a2e] border-l-2 border-blue-500 pl-[10px]'
-                            : 'hover:bg-[#1a1a1a] border-l-2 border-transparent pl-[10px]'
+                            ? 'bg-[#1a1a2e]'
+                            : 'hover:bg-[#1a1a1a]'
                           }`}
                       >
                         <MethodBadge method={endpoint.method} />

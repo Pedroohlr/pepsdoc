@@ -20,11 +20,11 @@ function getMethodColor(method: string): string {
   return METHOD_COLORS[method.toUpperCase()] ?? '#6b7280'
 }
 
-const NOTE_BORDER_COLORS: Record<string, string> = {
-  info: '#3b82f6',
-  warning: '#f59e0b',
-  tip: '#22c55e',
-  danger: '#ef4444',
+const NOTE_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
+  info:    { bg: 'rgba(59,130,246,0.08)',  text: '#60a5fa', icon: 'i' },
+  warning: { bg: 'rgba(245,158,11,0.08)', text: '#fbbf24', icon: '!' },
+  tip:     { bg: 'rgba(34,197,94,0.08)',  text: '#4ade80', icon: '✓' },
+  danger:  { bg: 'rgba(239,68,68,0.08)',  text: '#f87171', icon: '✕' },
 }
 
 function ParamTable({ title, fields, sectionId }: { title: string; fields: ParamField[]; sectionId?: string }) {
@@ -212,25 +212,35 @@ export function EndpointPage({ endpoint, baseUrl }: EndpointPageProps) {
             Notes
           </h3>
           <div className="space-y-3">
-            {endpoint.notes.map((note, idx) => (
+            {endpoint.notes.map((note, idx) => {
+              const style = NOTE_COLORS[note.type] ?? NOTE_COLORS.info
+              return (
               <div
                 key={idx}
                 className="rounded-lg px-4 py-3"
-                style={{
-                  borderLeft: `3px solid ${NOTE_BORDER_COLORS[note.type] ?? '#3b82f6'}`,
-                  backgroundColor: 'rgba(255,255,255,0.03)',
-                }}
+                style={{ backgroundColor: style.bg }}
               >
-                {note.title && (
-                  <p className="font-semibold text-sm mb-1" style={{ color: '#fff' }}>
-                    {note.title}
-                  </p>
-                )}
-                <p className="text-sm leading-relaxed" style={{ color: '#888' }}>
-                  {note.content}
-                </p>
+                <div className="flex items-start gap-2.5">
+                  <span
+                    className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5"
+                    style={{ backgroundColor: style.text + '22', color: style.text }}
+                  >
+                    {style.icon}
+                  </span>
+                  <div>
+                    {note.title && (
+                      <p className="font-semibold text-sm mb-0.5" style={{ color: style.text }}>
+                        {note.title}
+                      </p>
+                    )}
+                    <p className="text-sm leading-relaxed" style={{ color: '#aaa' }}>
+                      {note.content}
+                    </p>
+                  </div>
+                </div>
               </div>
-            ))}
+              )
+            })}
           </div>
         </section>
       )}
