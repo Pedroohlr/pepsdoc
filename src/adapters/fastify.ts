@@ -52,6 +52,7 @@ export function fastifyAdapter(app: FastifyInstance, userConfig?: Partial<PepsDo
   app.get(`${basePath}/api/data`, (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       const data = storage.compile();
+      data.config = { ...data.config, ...config, theme: { ...data.config.theme, ...config.theme } };
       reply.type('application/json').send(data);
     } catch {
       reply.code(500).send({ error: 'Failed to compile documentation' });

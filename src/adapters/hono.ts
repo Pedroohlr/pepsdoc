@@ -51,6 +51,7 @@ export function honoAdapter(app: HonoApp, userConfig?: Partial<PepsDocConfig>): 
   app.get(`${basePath}/api/data`, (c: HonoContext) => {
     try {
       const data = storage.compile();
+      data.config = { ...data.config, ...config, theme: { ...data.config.theme, ...config.theme } };
       return c.json(data);
     } catch {
       return c.json({ error: 'Failed to compile documentation' }, 500);

@@ -58,6 +58,12 @@ export function expressAdapter(app: ExpressApp, userConfig?: Partial<PepsDocConf
   app.get(`${basePath}/api/data`, (_req: ExpressRequest, res: ExpressResponse) => {
     try {
       const data = storage.compile();
+      // Merge runtime config on top of stored config so code always wins
+      data.config = {
+        ...data.config,
+        ...config,
+        theme: { ...data.config.theme, ...config.theme },
+      };
       res.json(data);
     } catch {
       res.status(500).json({ error: 'Failed to compile documentation' });
