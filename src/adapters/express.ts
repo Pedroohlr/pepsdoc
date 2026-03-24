@@ -22,9 +22,13 @@ interface ExpressResponse {
   json(data: unknown): void;
   sendFile(filePath: string): void;
   type(contentType: string): this;
-  send(body: string): void;
+  send(body: string | Buffer): void;
   status(code: number): this;
+  set(field: string, value: string): this;
+  end(data?: string | Buffer): void;
 }
+
+type NextFunction = () => void;
 
 /**
  * Inicializa o PepsDoc num app Express
@@ -63,20 +67,46 @@ export function expressAdapter(app: ExpressApp, userConfig?: Partial<PepsDocConf
   // __dirname will be dist/adapters/ when compiled, so go up 2 levels to package root
   const uiBuildDir = path.join(__dirname, '..', '..', 'ui', 'build');
 
-  if (fs.existsSync(uiBuildDir)) {
-    // Em produção: serve a build estática
-    app.get(`${basePath}`, (_req: ExpressRequest, res: ExpressResponse) => {
-      res.sendFile(path.join(uiBuildDir, 'index.html'));
-    });
+  const MIME_TYPES: Record<string, string> = {
+    '.html': 'text/html',
+    '.css': 'text/css',
+    '.js': 'application/javascript',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.map': 'application/json',
+  };
 
-    app.get(`${basePath}/*`, (req: ExpressRequest, res: ExpressResponse) => {
-      const filePath = path.join(uiBuildDir, req.path.replace(basePath, ''));
-      if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
-      } else {
-        // SPA fallback
-        res.sendFile(path.join(uiBuildDir, 'index.html'));
+  if (fs.existsSync(uiBuildDir)) {
+    // Serve static assets under basePath with correct MIME types
+    app.use(basePath, (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
+      // Skip API routes
+      if (req.path.startsWith('/api/')) {
+        next();
+        return;
       }
+
+      const filePath = path.join(uiBuildDir, req.path);
+
+      // Check if the file exists and is actually a file (not directory)
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        const ext = path.extname(filePath).toLowerCase();
+        const mime = MIME_TYPES[ext] || 'application/octet-stream';
+        res.set('Content-Type', mime);
+        res.send(fs.readFileSync(filePath));
+        return;
+      }
+
+      // SPA fallback: serve index.html for any non-file route
+      const indexPath = path.join(uiBuildDir, 'index.html');
+      res.set('Content-Type', 'text/html');
+      res.send(fs.readFileSync(indexPath, 'utf-8'));
     });
   } else {
     // Em dev: mostra mensagem placeholder
