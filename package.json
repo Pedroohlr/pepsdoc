@@ -1,0 +1,41 @@
+{
+  "name": "pepsdoc",
+  "version": "0.0.1",
+  "description": "API documentation, beautifully automated.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "pepsdoc": "dist/bin/pepsdoc.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "api",
+    "documentation",
+    "swagger",
+    "openapi",
+    "docs",
+    "rest",
+    "api-docs"
+  ],
+  "author": "Pedroohlr",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pedroohlr/pepsdoc"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^6.0.2"
+  }
+}
