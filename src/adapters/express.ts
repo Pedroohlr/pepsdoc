@@ -60,7 +60,8 @@ export function expressAdapter(app: ExpressApp, userConfig?: Partial<PepsDocConf
   });
 
   // Serve a UI estática
-  const uiBuildDir = path.join(__dirname, '..', 'ui', 'build');
+  // __dirname will be dist/adapters/ when compiled, so go up 2 levels to package root
+  const uiBuildDir = path.join(__dirname, '..', '..', 'ui', 'build');
 
   if (fs.existsSync(uiBuildDir)) {
     // Em produção: serve a build estática

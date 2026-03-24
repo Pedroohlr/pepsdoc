@@ -9,10 +9,13 @@
   },
   "files": [
     "dist",
-    "templates"
+    "templates",
+    "ui/build"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cd ui && npm run build",
+    "build:core": "tsc",
+    "build:ui": "cd ui && npm run build",
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build"
   },
