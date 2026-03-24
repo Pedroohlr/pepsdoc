@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useDocData } from './hooks/useDocData';
 import { Sidebar } from './components/Sidebar';
 import { EndpointPage } from './components/EndpointPage';
@@ -13,6 +13,8 @@ export default function App() {
   const [selectedEndpoint, setSelectedEndpoint] = useState<{ group: string; index: number } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('');
+  const mainRef = useRef<HTMLElement>(null);
 
   // Cmd+K / Ctrl+K to open search
   useEffect(() => {
@@ -41,12 +43,30 @@ export default function App() {
     return found || null;
   }, [data, selectedVersion]);
 
+  // Filter groups by active tab
+  const filteredGroups = useMemo(() => {
+    if (!currentVersion) return [];
+    if (!activeTab) return currentVersion.groups;
+    return currentVersion.groups.map((g) => ({
+      ...g,
+      endpoints: g.endpoints.filter((ep) => (ep.tab || '') === activeTab),
+    })).filter((g) => g.endpoints.length > 0);
+  }, [currentVersion, activeTab]);
+
   const currentEndpoint: Endpoint | null = useMemo(() => {
     if (!currentVersion || !selectedEndpoint) return null;
     const group = currentVersion.groups.find((g) => g.group === selectedEndpoint.group);
     if (!group) return null;
     return group.endpoints[selectedEndpoint.index] || null;
   }, [currentVersion, selectedEndpoint]);
+
+  // Scroll to section when anchor is clicked
+  const scrollToSection = (sectionId: string) => {
+    const el = mainRef.current?.querySelector(`[data-section="${sectionId}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   if (loading) {
     return (
@@ -70,6 +90,9 @@ export default function App() {
       </div>
     );
   }
+
+  const tabs = data.config.tabs;
+  const hasTabs = tabs && tabs.length > 0;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
@@ -102,11 +125,40 @@ export default function App() {
         </div>
       </header>
 
+      {/* Tab bar */}
+      {hasTabs && (
+        <div className="h-10 border-b border-[#1e1e1e] flex items-center px-4 gap-1 bg-[#0a0a0a] shrink-0">
+          <button
+            onClick={() => setActiveTab('')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+              activeTab === ''
+                ? 'bg-[#1a1a2e] text-[#818cf8]'
+                : 'text-[#888] hover:text-white hover:bg-[#1a1a1a]'
+            }`}
+          >
+            All
+          </button>
+          {tabs.map((tab) => (
+            <button
+              key={tab.slug}
+              onClick={() => setActiveTab(tab.slug)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                activeTab === tab.slug
+                  ? 'bg-[#1a1a2e] text-[#818cf8]'
+                  : 'text-[#888] hover:text-white hover:bg-[#1a1a1a]'
+              }`}
+            >
+              {tab.name}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* 3-column layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <Sidebar
-          groups={currentVersion.groups}
+          groups={filteredGroups}
           selectedEndpoint={selectedEndpoint}
           onSelectEndpoint={(group: string, index: number) => setSelectedEndpoint({ group, index })}
           searchQuery={searchQuery}
@@ -114,7 +166,7 @@ export default function App() {
         />
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto">
+        <main ref={mainRef} className="flex-1 overflow-y-auto">
           {currentEndpoint ? (
             <EndpointPage endpoint={currentEndpoint} baseUrl={data.config.baseUrl} />
           ) : (
@@ -132,13 +184,17 @@ export default function App() {
 
         {/* Response Panel (right) */}
         {currentEndpoint && (
-          <ResponsePanel endpoint={currentEndpoint} baseUrl={data.config.baseUrl} />
+          <ResponsePanel
+            endpoint={currentEndpoint}
+            baseUrl={data.config.baseUrl}
+            onScrollToSection={scrollToSection}
+          />
         )}
       </div>
 
       {/* Search Modal (Cmd+K) */}
       <SearchModal
-        groups={currentVersion.groups}
+        groups={filteredGroups}
         onSelect={(group: string, index: number) => setSelectedEndpoint({ group, index })}
         isOpen={searchOpen}
         onClose={() => setSearchOpen(false)}

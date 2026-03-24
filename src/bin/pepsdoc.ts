@@ -15,6 +15,7 @@ import * as http from 'http';
 import { Storage } from '../core/storage';
 import { DEFAULT_CONFIG } from '../core/config';
 import { dataToLLM } from '../export/llm';
+import { dataToOpenAPI } from '../export/openapi';
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -113,9 +114,18 @@ function cmdExport(): void {
     console.log(`  Exported to: pepsdoc-api-reference.md`);
     console.log('  You can copy this file and paste it into your AI chat to build the frontend.');
     console.log('');
+  } else if (format === 'openapi') {
+    const versionArg = args[2];
+    const spec = dataToOpenAPI(data, versionArg);
+    const outPath = path.join(projectRoot, 'openapi.json');
+    fs.writeFileSync(outPath, JSON.stringify(spec, null, 2), 'utf-8');
+    console.log('');
+    console.log(`  Exported to: openapi.json`);
+    console.log(`  OpenAPI 3.0.3 spec for version: ${spec.info.version}`);
+    console.log('');
   } else {
     console.error(`  Unknown export format: ${format}`);
-    console.error('  Available: llm, markdown');
+    console.error('  Available: llm, markdown, openapi');
     process.exit(1);
   }
 }
@@ -371,9 +381,14 @@ function printHelp(): void {
   console.log('    init       Initialize pepsdoc/ folder in your project');
   console.log('    dev        Start dev server with live reload');
   console.log('    build      Compile documentation data into .build/');
-  console.log('    export     Export docs to markdown/LLM format');
+  console.log('    export     Export docs (formats: llm, openapi)');
   console.log('    validate   Validate all JSON documentation files');
   console.log('    help       Show this message');
+  console.log('');
+  console.log('  Export formats:');
+  console.log('    npx pepsdoc export llm          Markdown for AI');
+  console.log('    npx pepsdoc export openapi       OpenAPI 3.0 JSON');
+  console.log('    npx pepsdoc export openapi v2    OpenAPI for specific version');
   console.log('');
   console.log('  Dev options:');
   console.log('    --port=N   Port for dev server (default: 4000)');

@@ -6,3 +6,4 @@ dist/
 ui/build/
 ui/node_modules/
 ui/package-lock.json
+test-app/

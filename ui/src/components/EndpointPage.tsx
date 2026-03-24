@@ -27,9 +27,9 @@ const NOTE_BORDER_COLORS: Record<string, string> = {
   danger: '#ef4444',
 }
 
-function ParamTable({ title, fields }: { title: string; fields: ParamField[] }) {
+function ParamTable({ title, fields, sectionId }: { title: string; fields: ParamField[]; sectionId?: string }) {
   return (
-    <section className="mt-8">
+    <section className="mt-8" data-section={sectionId}>
       <h3 className="text-base font-semibold mb-3" style={{ color: '#fff' }}>
         {title}
       </h3>
@@ -80,7 +80,7 @@ export function EndpointPage({ endpoint, baseUrl }: EndpointPageProps) {
   return (
     <div className="h-full overflow-y-auto px-8 py-10" style={{ color: '#e5e5e5' }}>
       {/* Header: method badge + path */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-3 flex-wrap" data-section="endpoint">
         <span
           className="inline-flex items-center px-3 py-1 rounded-md text-sm font-bold tracking-wide text-white select-none shrink-0"
           style={{ backgroundColor: methodColor }}
@@ -117,22 +117,22 @@ export function EndpointPage({ endpoint, baseUrl }: EndpointPageProps) {
 
       {/* Headers */}
       {endpoint.headers && endpoint.headers.length > 0 && (
-        <ParamTable title="Headers" fields={endpoint.headers} />
+        <ParamTable title="Headers" fields={endpoint.headers} sectionId="headers" />
       )}
 
       {/* Path Parameters */}
       {endpoint.pathParams && endpoint.pathParams.length > 0 && (
-        <ParamTable title="Path Parameters" fields={endpoint.pathParams} />
+        <ParamTable title="Path Parameters" fields={endpoint.pathParams} sectionId="path-params" />
       )}
 
       {/* Query Parameters */}
       {endpoint.queryParams && endpoint.queryParams.length > 0 && (
-        <ParamTable title="Query Parameters" fields={endpoint.queryParams} />
+        <ParamTable title="Query Parameters" fields={endpoint.queryParams} sectionId="query-params" />
       )}
 
       {/* Request Body */}
       {endpoint.body && (
-        <section className="mt-8">
+        <section className="mt-8" data-section="body">
           <h3 className="text-base font-semibold mb-3" style={{ color: '#fff' }}>
             Request Body
           </h3>
@@ -196,9 +196,18 @@ export function EndpointPage({ endpoint, baseUrl }: EndpointPageProps) {
         </section>
       )}
 
+      {/* Responses inline (for scroll targets) */}
+      {endpoint.responses && endpoint.responses.length > 0 && (
+        <section className="mt-8">
+          {endpoint.responses.map((res) => (
+            <div key={res.status} data-section={`response-${res.status}`} />
+          ))}
+        </section>
+      )}
+
       {/* Notes */}
       {endpoint.notes && endpoint.notes.length > 0 && (
-        <section className="mt-8">
+        <section className="mt-8" data-section="notes">
           <h3 className="text-base font-semibold mb-3" style={{ color: '#fff' }}>
             Notes
           </h3>

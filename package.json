@@ -17,6 +17,7 @@
     "build:core": "tsc",
     "build:ui": "cd ui && npm run build",
     "dev": "tsc --watch",
+    "postinstall": "node dist/bin/postinstall.js || true",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

@@ -136,20 +136,21 @@ export function Sidebar({
                       <button
                         key={`${endpoint.method}-${endpoint.path}-${idx}`}
                         onClick={() => onSelectEndpoint(group.group, idx)}
-                        className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-md transition-colors cursor-pointer ${
-                          selected
+                        className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-md transition-colors cursor-pointer ${selected
                             ? 'bg-[#1a1a2e] border-l-2 border-blue-500 pl-[10px]'
                             : 'hover:bg-[#1a1a1a] border-l-2 border-transparent pl-[10px]'
-                        }`}
+                          }`}
                       >
                         <MethodBadge method={endpoint.method} />
                         <span
-                          className={`text-sm truncate ${
-                            selected ? 'text-[#e0e0e0]' : 'text-[#999]'
-                          }`}
+                          className={`text-sm truncate ${endpoint.deprecated ? 'line-through opacity-50' : ''} ${selected ? 'text-[#e0e0e0]' : 'text-[#999]'
+                            }`}
                         >
                           {endpoint.path}
                         </span>
+                        {endpoint.deprecated && (
+                          <span className="text-[9px] px-1 py-0.5 rounded bg-red-500/10 text-red-400 shrink-0">DEP</span>
+                        )}
                       </button>
                     );
                   })}

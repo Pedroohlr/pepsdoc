@@ -23,9 +23,12 @@ export function pepsdoc(app: unknown, config?: Partial<PepsDocConfig>): void {
 
 // Re-export everything
 export { expressAdapter } from './adapters/express';
+export { fastifyAdapter } from './adapters/fastify';
+export { honoAdapter } from './adapters/hono';
 export { Storage } from './core/storage';
 export { DEFAULT_CONFIG, METHOD_COLORS } from './core/config';
 export { endpointToLLM, dataToLLM } from './export/llm';
+export { dataToOpenAPI } from './export/openapi';
 
 // Re-export types
 export type {

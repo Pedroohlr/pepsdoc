@@ -5,6 +5,7 @@ import { CodeBlock } from './CodeBlock';
 interface ResponsePanelProps {
   endpoint: Endpoint;
   baseUrl?: string;
+  onScrollToSection?: (sectionId: string) => void;
 }
 
 function generateLLMMarkdown(endpoint: Endpoint, baseUrl?: string): string {
@@ -71,21 +72,22 @@ function getStatusColor(status: number): string {
   return STATUS_COLORS[first] || '#6b7280';
 }
 
-export default function ResponsePanel({ endpoint, baseUrl }: ResponsePanelProps) {
+export default function ResponsePanel({ endpoint, baseUrl, onScrollToSection }: ResponsePanelProps) {
   const llmMarkdown = useMemo(() => generateLLMMarkdown(endpoint, baseUrl), [endpoint, baseUrl]);
   const [copiedLLM, setCopiedLLM] = useState(false);
 
   const sections = useMemo(() => {
-    const items: string[] = ['Endpoint'];
-    if (endpoint.headers?.length) items.push('Headers');
-    if (endpoint.pathParams?.length) items.push('Path Params');
-    if (endpoint.queryParams?.length) items.push('Query Params');
-    if (endpoint.body) items.push('Body');
+    const items: { label: string; id: string }[] = [{ label: 'Endpoint', id: 'endpoint' }];
+    if (endpoint.headers?.length) items.push({ label: 'Headers', id: 'headers' });
+    if (endpoint.pathParams?.length) items.push({ label: 'Path Params', id: 'path-params' });
+    if (endpoint.queryParams?.length) items.push({ label: 'Query Params', id: 'query-params' });
+    if (endpoint.body) items.push({ label: 'Body', id: 'body' });
     if (endpoint.responses?.length) {
       for (const r of endpoint.responses) {
-        items.push(`Response ${r.status}`);
+        items.push({ label: `Response ${r.status}`, id: `response-${r.status}` });
       }
     }
+    if (endpoint.notes?.length) items.push({ label: 'Notes', id: 'notes' });
     return items;
   }, [endpoint]);
 
@@ -104,10 +106,13 @@ export default function ResponsePanel({ endpoint, baseUrl }: ResponsePanelProps)
         </h3>
         <ul className="space-y-1.5">
           {sections.map((section) => (
-            <li key={section}>
-              <span className="text-sm text-[#888] hover:text-white cursor-pointer transition-colors">
-                {section}
-              </span>
+            <li key={section.id}>
+              <button
+                onClick={() => onScrollToSection?.(section.id)}
+                className="text-sm text-[#888] hover:text-white cursor-pointer transition-colors text-left"
+              >
+                {section.label}
+              </button>
             </li>
           ))}
         </ul>
@@ -149,11 +154,10 @@ export default function ResponsePanel({ endpoint, baseUrl }: ResponsePanelProps)
       <div className="p-4 border-t border-[#1e1e1e] mt-auto">
         <button
           onClick={handleCopyLLM}
-          className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg border transition-colors cursor-pointer ${
-            copiedLLM
+          className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg border transition-colors cursor-pointer ${copiedLLM
               ? 'bg-green-500/15 text-green-400 border-green-500/30'
               : 'bg-[#1a1a2e] hover:bg-[#252540] text-[#818cf8] border-[#2e2e4a]'
-          }`}
+            }`}
         >
           {copiedLLM ? (
             <>
